@@ -1,0 +1,88 @@
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Liste des Villes -->
+            <div class="col" *ngIf="villes">
+                <div *ngFor="let ville of villes._embedded.villes">
+                    <button [ngClass]="ville==currentVille?'btn btn-outline-dark active':''" type="button" id="villes_btn" class="btn btn-outline-dark" (click)="onGetCinema(ville)">{{ ville.name }}</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card mx-auto mb-5">
+                <div class="card-header"><div class="text-center">Cinémas</div></div>
+                <div class="card-body">
+                    <div class="row" *ngIf="cinemas">
+                        <div *ngFor="let cinema of cinemas._embedded.cinemas">
+                            <button [ngClass]="cinema==currentCinema?'btn btn-outline-warning active':''" type="button" id="cinemas_btn" class="btn btn-outline-warning" (click)="onGetSalles(cinema)">{{ cinema.name }}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" *ngIf="salles">
+                    <div class="col-sm-6" *ngFor="let salle of salles._embedded.salles">
+                      <div class="card mr-1 ml-1 mt-2 mb-2" *ngIf="salle.projections">
+                        <div class="card-header text-white bg-dark" >{{ salle.name }} : {{ salle.projections._embedded.projections[0].film.titre }}</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <img id="film_image" src="{{ cinemaService.url+'/imageFilm/'+salle.projections._embedded.projections[0].film.id }}"> 
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="card" style="width: 205px;">
+                                        <div class="card-header text-center text-white bg-secondary ">
+                                            Séances
+                                        </div>
+                                        <ul class="list-group list-group-flush" *ngFor="let s of salle.projections._embedded.projections">
+                                            <li [ngClass]="s==selectedProjection?'list-group-item active':'bg-light'" (click)="onGetPlaces(s)" class="list-group-item" style="height: 50px;vertical-align: middle;">
+                                                {{ s.seance.heureDebut}} (Prix: {{ s.prix | number:'0.00' }} DH)
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row ml-2 mr-2 mb-1 mt-1" *ngIf="clicked">
+                                <div *ngIf="salle.id == currentSalle">
+                                    <div class="row" *ngIf="currentProjection">
+                                        <div *ngFor="let proj of currentTicket">
+                                            <button class="{{ getTicketClass(proj) }}" (click)="onSelectedTicket(proj)" [disabled]="proj.reserve" type="button" id="btnPlaces">
+                                                <small><b>{{ proj.place.numero }}</b></small> 
+                                            </button>
+                                        </div>
+                                        <div *ngIf="selectedTicktes && selectedTicktes.length>0">
+                                            <form #f="ngForm" (ngSubmit)="onPayerTicket(f.value)" class="was-validated">
+                                                <div class="form-group">
+                                                    <label class="control-label">Nom Client</label>
+                                                    <input class="form-control" type="text" name="nomClient" ngModel required>
+                                                    <div class="valid-feedback">Ce champ est valide.</div>
+                                                    <div class="invalid-feedback">Ce champ est obligatoire !</div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label">Code Paiement</label>
+                                                    <input class="form-control" type="text" name="codePaiement" ngModel required>
+                                                    <div class="valid-feedback">Ce champ est valide.</div>
+                                                    <div class="invalid-feedback">Ce champ est obligatoire !</div>
+                                                </div>
+                                                <div>
+                                                    <button type="submit" class="btn btn-primary btn-block" (click)="popUpAlert=true">Payer</button>
+                                                </div>
+                                            </form>
+                                            <div class="{{ getAlertClass() }} mt-3" role="alert" [hidden]="!popUpAlert" *ngIf="success">
+                                                <strong>{{ headerMessage }}</strong> {{ bodyMessage }} 
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                  <span aria-hidden="true">&times;</span>
+                                                </button>
+                                              </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light text-center" >Nombre de Places : {{ nbrPlaces }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-footer text-center" *ngIf="nbrSalles!=0">Nombre de Salles : {{ nbrSalles }}</div>
+            </div>       
+        </div>
+    </div>
+</div>
